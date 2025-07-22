@@ -91,8 +91,8 @@
   :group 'julia-snail
   :safe (lambda (obj) (or (null obj) (stringp obj) (listp obj)))
   :type '(choice (const :tag "None" nil)
-                 (string :tag "Single string")
-                 (repeat :tag "List of strings" string)))
+          (string :tag "Single string")
+          (repeat :tag "List of strings" string)))
 (make-variable-buffer-local 'julia-snail-extra-args)
 
 (defcustom julia-snail-port 10011
@@ -109,7 +109,7 @@
   :group 'julia-snail
   :safe (lambda (obj) (or (null obj) (integerp obj)))
   :type '(choice (const :tag "Same as local" nil)
-                 (integer)))
+          (integer)))
 (make-variable-buffer-local 'julia-snail-remote-port)
 
 (defcustom julia-snail-repl-buffer "*julia*"
@@ -128,7 +128,7 @@
   :options '(:eat :vterm)
   :safe (lambda (v) (memq v '(:eat :vterm)))
   :type '(choice (const :tag "Eat" :eat)
-                 (const :tag "vterm" :vterm)))
+          (const :tag "vterm" :vterm)))
 ;;(make-variable-buffer-local 'julia-snail-terminal-type) ; XXX: Let's not make this a buffer-local switch. Too messy.
 
 (defcustom julia-snail-show-error-window t
@@ -172,8 +172,8 @@ another."
   :options '(:single-reuse :single-new :multi)
   :safe (lambda (v) (memq v '(:single-reuse :single-new :multi)))
   :type '(choice (const :tag "Reuse buffer and replace image" :single-reuse)
-                 (const :tag "New buffer for each image" :single-new)
-                 (const :tag "Append images to buffer" :multi)))
+          (const :tag "New buffer for each image" :single-new)
+          (const :tag "Append images to buffer" :multi)))
 (make-variable-buffer-local 'julia-snail-multimedia-buffer-style)
 
 (defcustom julia-snail-completions-doc-enable t
@@ -203,8 +203,8 @@ another."
   :group 'julia-snail
   :safe (lambda (v) (memq v '(:command :change nil)))
   :type '(choice (const :tag "Until next command" :command)
-                 (const :tag "Until next buffer change" :change)
-                 (const :tag "Off" nil)))
+          (const :tag "Until next buffer change" :change)
+          (const :tag "Off" nil)))
 
 (defcustom julia-snail-popup-display-face nil
   "Face used to display popups. If nil, try to make popups look reasonable."
@@ -227,8 +227,8 @@ nil means disable Snail-specific imenu integration (fall back on julia-mode impl
                     (defvar julia-snail--imenu-cache)
                     (setq julia-snail--imenu-cache nil))))
   :type '(choice (const :tag "Flat" :flat)
-                 (const :tag "Module-based tree structure" :module-tree)
-                 (const :tag "Use julia-mode" nil)))
+          (const :tag "Module-based tree structure" :module-tree)
+          (const :tag "Use julia-mode" nil)))
 
 (defcustom julia-snail-extensions (list)
   "A list of enabled Snail extensions."
@@ -246,26 +246,26 @@ nil means disable Snail-specific imenu integration (fall back on julia-mode impl
 (defconst julia-snail--julia-files
   ;; a slightly specialized directory walker to collect the correct file and directory list:
   (cl-labels ((list-extension-files (&optional (path "extensions"))
-                 (let* ((result nil)
-                        (entries (cl-remove-if
-                                  (lambda (entry)
-                                    (or (string-match-p "^\\." (file-name-nondirectory entry))
-                                        (and (file-regular-p (concat (file-name-as-directory path) entry))
-                                             (not (or (string-equal "jl" (downcase (or (file-name-extension entry) "")))
-                                                      (string-equal "toml" (downcase (or (file-name-extension entry) ""))))))))
-                                  (directory-files path)))
-                        (qualified-entries (if (string-equal "." path)
-                                               entries
-                                             (mapcar (lambda (entry)
-                                                       (concat (file-name-as-directory path) entry))
-                                                     entries))))
-                   (cl-loop for entry in qualified-entries do
-                            (if (file-regular-p entry)
-                                (setq result (cons entry result))
-                              (when (file-directory-p entry)
-                                (setq result (cons entry result))
-                                (setq result (append result (list-extension-files entry))))))
-                   result)))
+                (let* ((result nil)
+                       (entries (cl-remove-if
+                                 (lambda (entry)
+                                   (or (string-match-p "^\\." (file-name-nondirectory entry))
+                                       (and (file-regular-p (concat (file-name-as-directory path) entry))
+                                            (not (or (string-equal "jl" (downcase (or (file-name-extension entry) "")))
+                                                     (string-equal "toml" (downcase (or (file-name-extension entry) ""))))))))
+                                 (directory-files path)))
+                       (qualified-entries (if (string-equal "." path)
+                                              entries
+                                            (mapcar (lambda (entry)
+                                                      (concat (file-name-as-directory path) entry))
+                                                    entries))))
+                  (cl-loop for entry in qualified-entries do
+                           (if (file-regular-p entry)
+                               (setq result (cons entry result))
+                             (when (file-directory-p entry)
+                               (setq result (cons entry result))
+                               (setq result (append result (list-extension-files entry))))))
+                  result)))
     ;; actually put together the list
     (append
      (list "JuliaSnail.jl" "Project.toml" "extensions")
@@ -778,11 +778,11 @@ returns \"/home/username/file.jl\"."
           (user-error "The REPL terminal buffer is inactive; double-check julia-snail-executable path"))
         ;; now try to send the Snail startup command
         (julia-snail--send-to-repl
-         (format "JuliaSnail.start(%d%s) ; # please wait, time-to-first-plot..."
-		 (or julia-snail-remote-port julia-snail-port)
-		 (if (string-equal "docker" (file-remote-p (buffer-file-name julia-snail--repl-go-back-target) 'method))
-		     "; addr=\"0.0.0.0\""
-		   ""))
+          (format "JuliaSnail.start(%d%s) ; # please wait, time-to-first-plot..."
+		  (or julia-snail-remote-port julia-snail-port)
+		  (if (string-equal "docker" (file-remote-p (buffer-file-name julia-snail--repl-go-back-target) 'method))
+		      "; addr=\"0.0.0.0\""
+		    ""))
           :repl-buf repl-buf
           ;; wait a while in case dependencies need to be downloaded
           :polling-timeout (* 5 60 1000)
@@ -1410,12 +1410,12 @@ evaluated in the context of MODULE."
   ;; There must be a cleaner way to implement this logic.
   (let ((included-modules (julia-snail--module-for-file (buffer-file-name (buffer-base-buffer)))))
     (cl-labels ((some-helper
-                 (incls norms first-time)
-                 (if (null incls)
-                     norms
-                   (let* ((next (some-helper (cdr incls) norms nil))
-                          (tail (cons (car incls) (if first-time(list next) next))))
-                     (if first-time (list tail) tail)))))
+                  (incls norms first-time)
+                  (if (null incls)
+                      norms
+                    (let* ((next (some-helper (cdr incls) norms nil))
+                           (tail (cons (car incls) (if first-time(list next) next))))
+                      (if first-time (list tail) tail)))))
       (some-helper included-modules normal-tree t))))
 
 (cl-defun julia-snail-imenu ()
@@ -1538,7 +1538,197 @@ evaluated in the context of MODULE."
       (add-hook hook #'julia-snail--popup-cleanup nil 'local))))
 
 
-;;; --- support for completion modes' auxiliary doc modes (company-quickhelp and corfu-doc)
+;;; --- comment insertion support for evaluation results
+
+(defun julia-snail--format-result-as-comments (result-str)
+  "Format a result string as Julia comments, handling multi-line output properly."
+  (if (or (null result-str) (string= "" (s-trim result-str)))
+      ""
+    (let ((lines (s-split "\n" (s-trim result-str))))
+      (s-join "\n" (mapcar (lambda (line) (concat "# " line)) lines)))))
+
+(defun julia-snail--insert-result-as-comment (point result-str)
+  "Insert the evaluation result as a Julia comment at the specified point."
+  (when (and result-str (not (string= "" (s-trim result-str))))
+    (save-excursion
+      (goto-char point)
+      (end-of-line)
+      (insert "\n" (julia-snail--format-result-as-comments result-str)))))
+
+(defun julia-snail--comment-extract-string (data)
+  "Extract result string from evaluation data for comment insertion.
+Similar to julia-snail--popup-extract-string but works even when popup display is disabled."
+  (let* ((read-data (read data))
+         ;; scary
+         (eval-data (eval read-data)))
+    (when (and (listp eval-data) (car eval-data))
+      (cadr eval-data))))
+
+(defun julia-snail--replace-region-with-result (start end result-str)
+  "Replace the region from START to END with the evaluation result RESULT-STR."
+  (when (and result-str (not (string= "" (s-trim result-str))))
+    (save-excursion
+      (delete-region start end)
+      (goto-char start)
+      (insert (s-trim result-str)))))
+
+(defun julia-snail--replace-region-with-string-result (start end result-str)
+  "Replace the region from START to END with the evaluation result RESULT-STR."
+  (when (and result-str (not (string= "" (s-trim result-str))))
+    (save-excursion
+      (delete-region start end)
+      (goto-char start)
+      (insert (prin1-to-string (s-trim result-str))))))
+
+(cl-defun julia-snail--send-helper-with-comment-insertion
+    (block-start
+     block-end
+     &key
+     (allow-send-to-repl t)
+     (comment-insertion-point block-end)
+     (message-prefix "Evaluated"))
+  "Send code for evaluation and insert results as comments in buffer.
+Similar to julia-snail--send-helper but instead of showing popup results,
+insert them as Julia comments after the evaluated code."
+  (let ((text (buffer-substring-no-properties block-start block-end))
+        (filename (julia-snail--efn (buffer-file-name (buffer-base-buffer))))
+        (module (if current-prefix-arg :Main (julia-snail--module-at-point)))
+        (line-num (line-number-at-pos block-start))
+        (comment-point comment-insertion-point))
+    (julia-snail--flash-region block-start block-end)
+    (if (and allow-send-to-repl
+             (consp current-prefix-arg) (> (car current-prefix-arg) 4))
+        ;; copy directly to REPL
+        (let* ((_ (julia-snail--send-to-repl (s-trim text) :async nil))
+               (err (julia-snail--send-to-server
+                      :Main
+                      "Base.active_repl.waserror"
+                      :async nil))
+               ;; For comment insertion, we always want to format with reasonable width
+               (popup-params '(80 10))
+               (str (if (equal err :nothing)
+                        (julia-snail--send-to-server
+                          :Main
+                          (format "JuliaSnail.PopupDisplay.format(ans, %s, %s)"
+                                  (car popup-params)
+                                  (cadr popup-params))
+                          :async nil)
+                      "error")))
+          (julia-snail--insert-result-as-comment comment-point str))
+      ;; evaluate through the Snail server:
+      (julia-snail--send-to-server-via-tmp-file
+        module
+        text
+        filename
+        line-num
+        ;; Always provide popup display params for formatting even though we won't show popup
+        :popup-display-params '(80 10)
+        :callback-success (lambda (_request-info &optional data)
+                            (julia-snail--insert-result-as-comment comment-point (julia-snail--comment-extract-string data))
+                            (message "%s; module %s"
+                                     message-prefix
+                                     (julia-snail--construct-module-path module)))))))
+
+(cl-defun julia-snail--send-helper-with-replacement
+    (block-start
+     block-end
+     &key
+     (allow-send-to-repl t)
+     (message-prefix "Evaluated and replaced"))
+  "Send code for evaluation and replace the original code with the results.
+Similar to julia-snail--send-helper but instead of showing popup results,
+replace the original code with the formatted result."
+  (let ((text (buffer-substring-no-properties block-start block-end))
+        (filename (julia-snail--efn (buffer-file-name (buffer-base-buffer))))
+        (module (if current-prefix-arg :Main (julia-snail--module-at-point)))
+        (line-num (line-number-at-pos block-start))
+        (original-start block-start)
+        (original-end block-end))
+    (julia-snail--flash-region block-start block-end)
+    (if (and allow-send-to-repl
+             (consp current-prefix-arg) (> (car current-prefix-arg) 4))
+        ;; copy directly to REPL
+        (let* ((_ (julia-snail--send-to-repl (s-trim text) :async nil))
+               (err (julia-snail--send-to-server
+                      :Main
+                      "Base.active_repl.waserror"
+                      :async nil))
+               ;; For replacement, we always want to format with reasonable width
+               (popup-params '(80 10))
+               (str (if (equal err :nothing)
+                        (julia-snail--send-to-server
+                          :Main
+                          (format "JuliaSnail.PopupDisplay.format(ans, %s, %s)"
+                                  (car popup-params)
+                                  (cadr popup-params))
+                          :async nil)
+                      "error")))
+          (julia-snail--replace-region-with-result original-start original-end str))
+      ;; evaluate through the Snail server:
+      (julia-snail--send-to-server-via-tmp-file
+        module
+        text
+        filename
+        line-num
+        ;; Always provide popup display params for formatting even though we won't show popup
+        :popup-display-params '(80 10)
+        :callback-success (lambda (_request-info &optional data)
+                            (julia-snail--replace-region-with-result original-start original-end (julia-snail--comment-extract-string data))
+                            (message "%s; module %s"
+                                     message-prefix
+                                     (julia-snail--construct-module-path module)))))))
+
+(cl-defun julia-snail--send-helper-with-string-replacement
+    (block-start
+     block-end
+     &key
+     (allow-send-to-repl t)
+     (message-prefix "Evaluated and replaced"))
+  "Send code for evaluation and replace the original code with the results.
+Similar to julia-snail--send-helper but instead of showing popup results,
+replace the original code with the formatted result."
+  (let ((text (buffer-substring-no-properties block-start block-end))
+        (filename (julia-snail--efn (buffer-file-name (buffer-base-buffer))))
+        (module (if current-prefix-arg :Main (julia-snail--module-at-point)))
+        (line-num (line-number-at-pos block-start))
+        (original-start block-start)
+        (original-end block-end))
+    (julia-snail--flash-region block-start block-end)
+    (if (and allow-send-to-repl
+             (consp current-prefix-arg) (> (car current-prefix-arg) 4))
+        ;; copy directly to REPL
+        (let* ((_ (julia-snail--send-to-repl (s-trim text) :async nil))
+               (err (julia-snail--send-to-server
+                      :Main
+                      "Base.active_repl.waserror"
+                      :async nil))
+               ;; For replacement, we always want to format with reasonable width
+               (popup-params '(80 10))
+               (str (if (equal err :nothing)
+                        (julia-snail--send-to-server
+                          :Main
+                          (format "JuliaSnail.PopupDisplay.format(ans, %s, %s)"
+                                  (car popup-params)
+                                  (cadr popup-params))
+                          :async nil)
+                      "error")))
+          (julia-snail--replace-region-with-string-result original-start original-end str))
+      ;; evaluate through the Snail server:
+      (julia-snail--send-to-server-via-tmp-file
+        module
+        text
+        filename
+        line-num
+        ;; Always provide popup display params for formatting even though we won't show popup
+        :popup-display-params '(80 10)
+        :callback-success (lambda (_request-info &optional data)
+                            (julia-snail--replace-region-with-result original-start original-end (julia-snail--comment-extract-string data))
+                            (message "%s; module %s"
+                                     message-prefix
+                                     (julia-snail--construct-module-path module)))))))
+
+
+;;; --- support for completion modes' auxiliary doc modes (company-quickhelp and corfu-doc)
 
 (defun julia-snail--completions-doc-buffer (str)
   (let* ((module (julia-snail--module-at-point))
@@ -1577,7 +1767,7 @@ evaluated in the context of MODULE."
   ;; figuring out just which possible signatures of a function are being called
   ;; and display documentation accordingly.
   nil
-)
+  )
 
 
 ;;; --- multimedia support
@@ -1844,6 +2034,268 @@ This will occur in the context of the Main module, just as it would at the REPL.
         ;; successful load
         (julia-snail--module-merge-includes filename includes)))))
 
+
+;;; --- comment-based evaluation functions (insert results as comments)
+
+(defun julia-snail-send-line-and-insert-result ()
+  "Send the line at point to the Julia REPL, evaluate it, and insert the result as a comment.
+Without a prefix arg, evaluation occurs in the context of the current module.
+If one prefix arg is used (C-u), evaluation occurs in the context of the Main module.
+If two or more prefix args are used (C-u C-u), the code is instead copied directly into the REPL, and evaluation occurs in the context of the Main module."
+  (interactive)
+  (let ((block-start (line-beginning-position))
+        (block-end (line-end-position)))
+    (unless (eq block-start block-end)
+      (julia-snail--send-helper-with-comment-insertion
+       block-start block-end
+       :message-prefix "Line evaluated, result inserted as comment"))))
+
+(defun julia-snail-send-region-and-insert-result ()
+  "Send the region (requires transient-mark) to the Julia REPL, evaluate it, and insert the result as a comment.
+Without a prefix arg, evaluation occurs in the context of the current module.
+If one prefix arg is used (C-u), evaluation occurs in the context of the Main module.
+If two or more prefix args are used (C-u C-u), the code is instead copied directly into the REPL, and evaluation occurs in the context of the Main module."
+  (interactive)
+  (if (null (use-region-p))
+      (user-error "No region selected")
+    (let ((block-start (region-beginning))
+          (block-end (region-end)))
+      (julia-snail--send-helper-with-comment-insertion
+       block-start block-end
+       :message-prefix "Selected region evaluated, result inserted as comment"))))
+
+(defun julia-snail-send-top-level-form-and-insert-result ()
+  "Send the top level form around the point to the Julia REPL, evaluate it, and insert the result as a comment.
+This occurs in the context of the current module.
+Currently only works on blocks terminated with `end'."
+  (interactive)
+  (let* ((q (julia-snail--cst-block-at (current-buffer) (point)))
+         (filename (julia-snail--efn (buffer-file-name (buffer-base-buffer))))
+         (module (julia-snail--module-at-point (-first-item q)))
+         (block-start (byte-to-position (or (-second-item q) -1)))
+         (block-end (byte-to-position (or (-third-item q) -1)))
+         (top-level-form-name (or (-fourth-item q) nil))
+         (line-num (line-number-at-pos block-start))
+         (text (condition-case nil
+                   (buffer-substring-no-properties block-start block-end)
+                 (error ""))))
+    (if (null q)
+        (user-error "No top-level form at point")
+      (julia-snail--flash-region block-start block-end)
+      (julia-snail--send-to-server-via-tmp-file
+        module
+        text
+        filename
+        line-num
+        ;; Always provide popup display params for formatting even though we won't show popup
+        :popup-display-params '(80 10)
+        :callback-success (lambda (_request-info &optional data)
+                            (julia-snail--insert-result-as-comment block-end (julia-snail--comment-extract-string data))
+                            (message "Top-level form evaluated, result inserted as comment: %s; module %s"
+                                     (if top-level-form-name
+                                         top-level-form-name
+                                       "unknown")
+                                     (julia-snail--construct-module-path module)))))))
+
+(defun julia-snail-send-dwim-and-insert-result ()
+  "Send region, block, or line to Julia REPL and insert result as comment."
+  (interactive)
+  (if (use-region-p)                    ; region
+      (julia-snail-send-region-and-insert-result)
+    (condition-case _err                ; block
+        (julia-snail-send-top-level-form-and-insert-result)
+      (user-error                       ; block fails, so send line
+       (julia-snail-send-line-and-insert-result)))))
+
+(defun julia-snail--julia-version-number ()
+  "Get the Julia version number as a float for comparison."
+  (let ((version-str (julia-snail--send-to-server
+                       :Main
+                       "string(VERSION.major, \".\", VERSION.minor)"
+                       :async nil)))
+    (if (stringp version-str)
+        (string-to-number version-str)
+      1.8))) ; default fallback
+
+(defun julia-snail-repl-switch-to-module (&optional module)
+  "Switch the Julia REPL context to MODULE.
+If MODULE is not provided, use the module context of the current file/point.
+MODULE can be:
+- nil (use current context)
+- a string like \"MyModule\"
+- a list like (\"MyModule\" \"SubModule\")
+- :Main for the Main module
+
+With prefix arg, prompts for module name."
+  (interactive 
+   (list (when current-prefix-arg
+           (let ((module-str (read-string "Module to switch to: " 
+                                          (julia-snail--construct-module-path
+                                           (julia-snail--module-at-point)))))
+             (if (string-match-p "^:" module-str)
+                 (intern module-str)
+               (split-string module-str "\\."))))))
+  (let* ((target-module (or module (julia-snail--module-at-point)))
+         (module-path (julia-snail--construct-module-path target-module))
+         (module-name (if (listp target-module)
+                          (mapconcat 'identity target-module ".")
+                        (replace-regexp-in-string "^:" "" (symbol-name target-module))))
+         (repl-command (format "REPL.activate(%s)" module-path)))
+    (julia-snail--send-to-repl repl-command :async nil)
+    (message "Switched REPL context to module: %s" module-name)))
+
+(defun julia-snail-repl-switch-to-current-module ()
+  "Switch the Julia REPL context to the module of the current file/point."
+  (interactive)
+  (julia-snail-repl-switch-to-module))
+
+
+;;; --- replacement-based evaluation functions (replace code with results)
+
+(defun julia-snail-send-line-and-replace-with-result ()
+  "Send the line at point to the Julia REPL, evaluate it, and replace the line with the result.
+Without a prefix arg, evaluation occurs in the context of the current module.
+If one prefix arg is used (C-u), evaluation occurs in the context of the Main module.
+If two or more prefix args are used (C-u C-u), the code is instead copied directly into the REPL, and evaluation occurs in the context of the Main module."
+  (interactive)
+  (let ((block-start (line-beginning-position))
+        (block-end (line-end-position)))
+    (unless (eq block-start block-end)
+      (julia-snail--send-helper-with-replacement
+       block-start block-end
+       :message-prefix "Line evaluated and replaced with result"))))
+
+(defun julia-snail-send-region-and-replace-with-result ()
+  "Send the region (requires transient-mark) to the Julia REPL, evaluate it, and replace the region with the result.
+Without a prefix arg, evaluation occurs in the context of the current module.
+If one prefix arg is used (C-u), evaluation occurs in the context of the Main module.
+If two or more prefix args are used (C-u C-u), the code is instead copied directly into the REPL, and evaluation occurs in the context of the Main module."
+  (interactive)
+  (if (null (use-region-p))
+      (user-error "No region selected")
+    (let ((block-start (region-beginning))
+          (block-end (region-end)))
+      (julia-snail--send-helper-with-replacement
+       block-start block-end
+       :message-prefix "Selected region evaluated and replaced with result"))))
+
+(defun julia-snail-send-top-level-form-and-replace-with-result ()
+  "Send the top level form around the point to the Julia REPL, evaluate it, and replace the form with the result.
+This occurs in the context of the current module.
+Currently only works on blocks terminated with `end'."
+  (interactive)
+  (let* ((q (julia-snail--cst-block-at (current-buffer) (point)))
+         (filename (julia-snail--efn (buffer-file-name (buffer-base-buffer))))
+         (module (julia-snail--module-at-point (-first-item q)))
+         (block-start (byte-to-position (or (-second-item q) -1)))
+         (block-end (byte-to-position (or (-third-item q) -1)))
+         (top-level-form-name (or (-fourth-item q) nil))
+         (line-num (line-number-at-pos block-start))
+         (text (condition-case nil
+                   (buffer-substring-no-properties block-start block-end)
+                 (error ""))))
+    (if (null q)
+        (user-error "No top-level form at point")
+      (julia-snail--flash-region block-start block-end)
+      (julia-snail--send-to-server-via-tmp-file
+        module
+        text
+        filename
+        line-num
+        ;; Always provide popup display params for formatting even though we won't show popup
+        :popup-display-params '(80 10)
+        :callback-success (lambda (_request-info &optional data)
+                            (julia-snail--replace-region-with-result block-start block-end (julia-snail--comment-extract-string data))
+                            (message "Top-level form evaluated and replaced with result: %s; module %s"
+                                     (if top-level-form-name
+                                         top-level-form-name
+                                       "unknown")
+                                     (julia-snail--construct-module-path module)))))))
+
+(defun julia-snail-send-dwim-and-replace-with-result ()
+  "Send region, block, or line to Julia REPL and replace with result."
+  (interactive)
+  (if (use-region-p)                    ; region
+      (julia-snail-send-region-and-replace-with-result)
+    (condition-case _err                ; block
+        (julia-snail-send-top-level-form-and-replace-with-result)
+      (user-error                       ; block fails, so send line
+       (julia-snail-send-line-and-replace-with-result)))))
+
+
+;;; --- string-replacement-based evaluation functions (replace code with results)
+
+(defun julia-snail-send-line-and-replace-with-string-result ()
+  "Send the line at point to the Julia REPL, evaluate it, and replace the line with the result.
+Without a prefix arg, evaluation occurs in the context of the current module.
+If one prefix arg is used (C-u), evaluation occurs in the context of the Main module.
+If two or more prefix args are used (C-u C-u), the code is instead copied directly into the REPL, and evaluation occurs in the context of the Main module."
+  (interactive)
+  (let ((block-start (line-beginning-position))
+        (block-end (line-end-position)))
+    (unless (eq block-start block-end)
+      (julia-snail--send-helper-with-string-replacement
+       block-start block-end
+       :message-prefix "Line evaluated and replaced with result"))))
+
+(defun julia-snail-send-region-and-replace-with-string-result ()
+  "Send the region (requires transient-mark) to the Julia REPL, evaluate it, and replace the region with the result.
+Without a prefix arg, evaluation occurs in the context of the current module.
+If one prefix arg is used (C-u), evaluation occurs in the context of the Main module.
+If two or more prefix args are used (C-u C-u), the code is instead copied directly into the REPL, and evaluation occurs in the context of the Main module."
+  (interactive)
+  (if (null (use-region-p))
+      (user-error "No region selected")
+    (let ((block-start (region-beginning))
+          (block-end (region-end)))
+      (julia-snail--send-helper-with-string-replacement
+       block-start block-end
+       :message-prefix "Selected region evaluated and replaced with result"))))
+
+(defun julia-snail-send-top-level-form-and-replace-with-string-result ()
+  "Send the top level form around the point to the Julia REPL, evaluate it, and replace the form with the result.
+This occurs in the context of the current module.
+Currently only works on blocks terminated with `end'."
+  (interactive)
+  (let* ((q (julia-snail--cst-block-at (current-buffer) (point)))
+         (filename (julia-snail--efn (buffer-file-name (buffer-base-buffer))))
+         (module (julia-snail--module-at-point (-first-item q)))
+         (block-start (byte-to-position (or (-second-item q) -1)))
+         (block-end (byte-to-position (or (-third-item q) -1)))
+         (top-level-form-name (or (-fourth-item q) nil))
+         (line-num (line-number-at-pos block-start))
+         (text (condition-case nil
+                   (buffer-substring-no-properties block-start block-end)
+                 (error ""))))
+    (if (null q)
+        (user-error "No top-level form at point")
+      (julia-snail--flash-region block-start block-end)
+      (julia-snail--send-to-server-via-tmp-file
+        module
+        text
+        filename
+        line-num
+        ;; Always provide popup display params for formatting even though we won't show popup
+        :popup-display-params '(80 10)
+        :callback-success (lambda (_request-info &optional data)
+                            (julia-snail--replace-region-with-string-result block-start block-end (julia-snail--comment-extract-string data))
+                            (message "Top-level form evaluated and replaced with result: %s; module %s"
+                                     (if top-level-form-name
+                                         top-level-form-name
+                                       "unknown")
+                                     (julia-snail--construct-module-path module)))))))
+
+(defun julia-snail-send-dwim-and-replace-with-string-result ()
+  "Send region, block, or line to Julia REPL and replace with result."
+  (interactive)
+  (if (use-region-p)                    ; region
+      (julia-snail-send-region-and-replace-with-result)
+    (condition-case _err                ; block
+        (julia-snail-send-top-level-form-and-replace-with-result)
+      (user-error                       ; block fails, so send line
+       (julia-snail-send-line-and-replace-with-result)))))
+
+
 (defun julia-snail-package-activate (dir)
   "Activate a Pkg project located in DIR in the Julia REPL."
   (interactive "DProject directory: ")
@@ -1984,6 +2436,8 @@ autocompletion aware of the available modules."
     ["Activate package" julia-snail-package-activate]
     ["Lookup documentation" julia-snail-doc-lookup]
     ["Update module cache" julia-snail-update-module-cache]
+    ["Switch REPL to current module" julia-snail-repl-switch-to-current-module]
+    ["Switch REPL to module..." julia-snail-repl-switch-to-module]
     "---"
     ["Evaluate line" julia-snail-send-line]
     ["Evaluate top-level form" julia-snail-send-top-level-form]
